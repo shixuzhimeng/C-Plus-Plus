@@ -46,11 +46,61 @@ using namespace std;
 //     cout << a + b << endl;
 // }
 
-void test(char a, int b)
-{
-	cout << a << b << endl;
-}
-void test(int a, char b)
-{
-	cout << a << b << endl;
-}
+// void test(char a, int b)
+// {
+// 	cout << a << b << endl;
+// }
+// void test(int a, char b)
+// {
+// 	cout << a << b << endl;
+// }
+
+// int main()
+// {
+// 	int a = 0;
+// 	//将b作为a的别名
+// 	int& b = a;
+// 	int& c = b;
+// 	int& d = a;
+
+// 	cout << &a << endl;
+// 	cout << &b << endl;
+// 	cout << &c << endl;
+
+// 	int x = 1;
+// 	//是将x的值赋给b
+// 	b = x;
+// }
+
+
+// void Swap(int& a, int& b)
+// {
+// 	int tmp = a;
+// 	a = b;
+// 	b = tmp;
+// }
+
+// void Swap(int*& a, int*& b)
+// {
+// 	int* tmp = a;
+// 	a = b;
+// 	b = tmp;
+// }
+
+
+// int main()
+// {
+// 	int x = 0;
+// 	int y = 1;
+// 	Swap(x, y);
+// 	cout << x << " " << y << endl;
+
+// 	int* px = &x;
+// 	int* py = &y;
+// 	cout << px << " " << py << endl;
+// 	Swap(px, py);
+// 	cout << px << " " << py << endl;
+
+// 	return 0;
+// }
+
