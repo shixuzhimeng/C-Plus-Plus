@@ -104,3 +104,26 @@ using namespace std;
 // 	return 0;
 // }
 
+// int count()
+// {
+// 	static int n = 0;
+// 	n++;
+
+// 	return n;
+// }
+
+int& Count()
+{
+	int n = 0;
+	n++;
+
+	return n;
+}
+
+int main()
+{
+	int& ret = count();
+
+	return 0;
+
+}
