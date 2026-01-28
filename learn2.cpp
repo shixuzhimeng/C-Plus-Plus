@@ -104,13 +104,13 @@ using namespace std;
 // 	return 0;
 // }
 
-// int count()
-// {
-// 	static int n = 0;
-// 	n++;
+int count()
+{
+	static int n = 0;
+	n++;
 
-// 	return n;
-// }
+	return n;
+}
 
 int& Count()
 {
