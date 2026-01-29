@@ -81,35 +81,52 @@ using namespace std;
 //     return 0;
 // }
 
+// int main() {
+//     int arr[] = {0, 1, 2, 3, 4, 5, 6};
+
+//     for(int i = 0; i < sizeof(arr)/sizeof(int); i++)
+//         arr[i] *= 2;
+
+//     for(int *p = arr; p < arr + sizeof(arr) / sizeof(arr[0]); ++p)
+//         cout << *p <<  " ";
+//     cout << endl;
+
+//     //范围for
+//     //适用于数组/容器
+//     //依次取数组中数据赋值给e
+//     //自动迭代，自动判断结束
+//     for(auto e : arr) {
+//         cout << e << " ";
+//     }
+//     cout << endl;
+
+
+//     //修改数据
+//     for(auto& e : arr) {
+//         e *= 2;
+//     }
+//     for(auto e : arr) {
+//         cout << e << " ";
+//     }
+//     cout << endl;
+
+
+//     return 0;
+// }
+
+//内联函数
+//适用于短小的频繁调用的函数
+//inline对于编译器只是一个建议，最终是否成为inline，编译器自己决定
+//1.比较长的函数
+//2.递归函数
+inline int add(int x, int y) {
+    return x + y;
+}
+
 int main() {
-    int arr[] = {0, 1, 2, 3, 4, 5, 6};
-
-    for(int i = 0; i < sizeof(arr)/sizeof(int); i++)
-        arr[i] *= 2;
-
-    for(int *p = arr; p < arr + sizeof(arr) / sizeof(arr[0]); ++p)
-        cout << *p <<  " ";
-    cout << endl;
-
-    //范围for
-    //适用于数组/容器
-    //依次取数组中数据赋值给e
-    //自动迭代，自动判断结束
-    for(auto e : arr) {
-        cout << e << " ";
+    for(int i = 0; i < 10000; i++)
+    {
+        cout << add(i, i+1) << endl;
     }
-    cout << endl;
-
-
-    //修改数据
-    for(auto& e : arr) {
-        e *= 2;
-    }
-    for(auto e : arr) {
-        cout << e << " ";
-    }
-    cout << endl;
-
-    
     return 0;
 }
