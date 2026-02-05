@@ -35,13 +35,23 @@ public:
     //但是写为全局就可以
     //void operator<<(ostream& out);
     friend ostream& operator<<(ostream& out, const Date& d);
-    friend ostream& operator>>(istream& out, Date& d);
+    friend istream& operator>>(istream& out, Date& d);
 
 private:
     int _year;
     int _month;
     int _day;
 };
+Date::Date(int year, int month, int day) {
+    if(month > 0 && month < 13 && _day > 0 && day <= GetMonthDay(_year, _month)) {
+        _year = year;
+        _month = month;
+        _day = day;
+    }
+    else {
+        cout << "输入日期错误" << endl;
+    }
+}
 bool Date::operator<(const Date& d) {
     if(_year < d._year) {
         return true;
@@ -168,7 +178,7 @@ ostream& operator<<(ostream& out, const Date& d) {
     return out;
 }
 
-ostream& operator>>(istream& in, Date& d)  {
+istream& operator>>(istream& in, Date& d)  {
     in >> d._year >> d._month >> d._day;
     return in;
 }
