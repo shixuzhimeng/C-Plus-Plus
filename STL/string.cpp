@@ -66,34 +66,67 @@ using namespace std;
 //     return 0;
 // }
 
+// int main() {
+//     string s1("hello world");
+
+//     string::iterator it = s1.begin();
+//     while(it != s1.end()) {
+//         //写
+//         (*it)--;
+
+//         ++it;
+//     }
+//     cout << endl;
+
+//     string::iterator it = s1.begin();
+//     while(it != s1.end()) {
+//         //读
+//         cout << *it << " ";
+//         ++it;
+//     }
+//     cout << endl;
+
+//     for(auto& ch : s1) {
+//         ch++;
+//     }
+//     cout << endl;
+
+
+//     for(char ch : s1) {
+//         cout << endl;
+//     }
+//     cout << endl;
+
+//     return 0;
+// }
+
+// int main() {
+//     reverse(v.begin(), v.end());
+//     for(auto e : v) {
+//         cout << e << " ";
+//     }
+
+
+//     return 0;
+// }
+
+// int main () {
+//     string s1("hello world");
+//     //string::reserve_iterator rit = s1.rbegin();
+//     auto rit = s1.rbegin();
+//     while(rit != s1.rend()) {
+//         cout << *rit << " ";
+//         ++rit;
+//     }
+//     cout << endl;
+//     return 0;
+// }
+
 int main() {
-    string s1("hello world");
-
-    string::iterator it = s1.begin();
-    while(it != s1.end()) {
-        //写
-        (*it)--;
-
-        ++it;
-    }
-    cout << endl;
-
-    string::iterator it = s1.begin();
-    while(it != s1.end()) {
-        //读
-        cout << *it << " ";
-        ++it;
-    }
-    cout << endl;
-
-    for(auto& ch : s1) {
-        ch++;
-    }
-
-    for(char ch : s1) {
-        cout << endl;
-    }
-    cout << endl;
-
+    string s1("haha");
+    cout << s1.size() << endl;
+    cout << s1.length() << endl;
+    cout << s1.max_size() << endl;
+    cout << s1.capacity() << endl;
     return 0;
 }
