@@ -122,11 +122,70 @@ using namespace std;
 //     return 0;
 // }
 
+// int main() {
+//     string s1("haha");
+//     cout << s1.size() << endl;
+//     cout << s1.length() << endl;
+//     cout << s1.max_size() << endl;
+//     cout << s1.capacity() << endl;
+//     return 0;
+// }
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+// int main() {
+//     // 创建字符串
+//     string str1 = "Hello";
+//     string str2("World");
+//     string str3(5, 'A');  // "AAAAA"
+    
+//     cout << str1 << endl;     // Hello
+//     cout << str2 << endl;     // World
+//     cout << str3 << endl;     // AAAAA
+    
+//     // 获取长度
+//     cout << str1.length() << endl;     // 5
+//     cout << str1.size() << endl;       // 5 (与length相同)
+//     cout << str1.capacity() << endl;   // 当前分配的内存大小
+    
+//     // 访问字符
+//     cout << str1[0] << endl;           // H
+//     cout << str1.at(1) << endl;        // e
+//     cout << str1.front() << endl;      // H (C++11)
+//     cout << str1.back() << endl;       // o (C++11)
+    
+//     return 0;
+// }
+#include <iostream>
+#include <string>
+using namespace std;
+
 int main() {
-    string s1("haha");
-    cout << s1.size() << endl;
-    cout << s1.length() << endl;
-    cout << s1.max_size() << endl;
-    cout << s1.capacity() << endl;
+    string s1 = "Hello";
+    string s2 = "World";
+    
+    // 方法1：使用 + 运算符
+    string s3 = s1 + " " + s2;
+    cout << s3 << endl;  // Hello World
+    
+    // 方法2：使用 append()
+    string s4 = s1;
+    s4.append(" ");
+    s4.append(s2);
+    cout << s4 << endl;  // Hello World
+    
+    // 方法3：使用 +=
+    string s5 = s1;
+    s5 += " ";
+    s5 += s2;
+    cout << s5 << endl;  // Hello World
+    
+    // 连接字符和数字
+    string s6 = "Number: ";
+    s6 += to_string(42);
+    cout << s6 << endl;  // Number: 42
+    
     return 0;
 }
