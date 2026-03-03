@@ -162,30 +162,31 @@ using namespace std;
 #include <string>
 using namespace std;
 
-int main() {
-    string s1 = "Hello";
-    string s2 = "World";
+// int main() {
+//     string s1 = "Hello";
+//     string s2 = "World";
     
-    // 方法1：使用 + 运算符
-    string s3 = s1 + " " + s2;
-    cout << s3 << endl;  // Hello World
+//     // 方法1：使用 + 运算符
+//     string s3 = s1 + " " + s2;
+//     cout << s3 << endl;  // Hello World
     
-    // 方法2：使用 append()
-    string s4 = s1;
-    s4.append(" ");
-    s4.append(s2);
-    cout << s4 << endl;  // Hello World
+//     // 方法2：使用 append()
+//     string s4 = s1;
+//     s4.append(" ");
+//     s4.append(s2);
+//     cout << s4 << endl;  // Hello World
     
-    // 方法3：使用 +=
-    string s5 = s1;
-    s5 += " ";
-    s5 += s2;
-    cout << s5 << endl;  // Hello World
+//     // 方法3：使用 +=
+//     string s5 = s1;
+//     s5 += " ";
+//     s5 += s2;
+//     cout << s5 << endl;  // Hello World
     
-    // 连接字符和数字
-    string s6 = "Number: ";
-    s6 += to_string(42);
-    cout << s6 << endl;  // Number: 42
+//     // 连接字符和数字
+//     string s6 = "Number: ";
+//     s6 += to_string(42);
+//     cout << s6 << endl;  // Number: 42
     
-    return 0;
-}
+//     return 0;
+// }
+
