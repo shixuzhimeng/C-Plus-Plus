@@ -57,14 +57,47 @@ using namespace std;
 //     int c = 2;
 // };
 
-class Base {
+// class Base {
+// public:
+//     Base() { cout << "Base constructor" << endl; }
+//     ~Base() { cout << "Base destructor" << endl; }
+// };
+
+// class Derived : public Base {
+// public:
+//     Derived() { cout << "Derived constructor" << endl; }
+//     ~Derived() { cout << "Derived destructor" << endl; }
+// };
+
+#include <iostream>
+using namespace std;
+
+class A {
 public:
-    Base() { cout << "Base constructor" << endl; }
-    ~Base() { cout << "Base destructor" << endl; }
+    int a = 10;
 };
 
-class Derived : public Base {
+class B : virtual public A{
 public:
-    Derived() { cout << "Derived constructor" << endl; }
-    ~Derived() { cout << "Derived destructor" << endl; }
+    int b = 20;
 };
+
+class C : virtual public A{
+public:
+    int c = 30;
+};
+
+class D : public B ,public C {
+public:
+    int d = 40;
+};
+
+int main () {
+    D d;
+    d.a = 15;
+    d.a = 36;
+    cout << d.a << endl;
+    cout << d.B::a << endl;
+    cout << d.A::a << endl;
+    return 0;
+}
