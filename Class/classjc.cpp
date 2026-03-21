@@ -198,43 +198,58 @@ using namespace std;
 //     }
 // };
 
+// #include <iostream>
+// using namespace std;
+
+// class Drink {
+// public:
+//     //煮水
+//     virtual void Boil() = 0;
+//     //冲泡
+//     virtual void Brew() = 0;
+//     //倒入杯中
+//     virtual void PourInCup() = 0;
+//     //加入辅料
+//     virtual void PutSomething() = 0;
+//     //制作饮品
+//     virtual void MakeDrink() {
+//         Boil();
+//         Brew();
+//         PourInCup();
+//         PutSomething();
+//     }
+// };
+
+// class Coffee : public Drink {
+// public:
+//     virtual void Boil() {
+//         cout << "煮水" << endl;
+//     }
+//     virtual void Brew() {
+//         cout << "冲泡" << endl;
+//     }
+//     virtual void PourInCup() {
+//         cout << "倒入杯中" << endl;
+//     }
+//     virtual void PutSomething() {
+//         cout << "加入糖和牛奶" << endl;
+//     }
+// };
+
+// //Drink* a = new a;
+// void work (Drink * a) {
+//     a->MakeDrink();
+//     delete a;
+// }
+
+// int main () {
+//     work(new Coffee);
+//     return 0;
+// }
+
 #include <iostream>
 using namespace std;
-
-class Drink {
-    //煮水
-    virtual void Boil() = 0;
-    //冲泡
-    virtual void Brew() = 0;
-    //倒入杯中
-    virtual void PourInCup() = 0;
-    //加入辅料
-    virtual void PutSomething() = 0;
-    //制作饮品
-    virtual void MakeDrink() {
-        Boil();
-        Brew();
-        PourInCup();
-        PutSomething();
-    }
-};
-
-class Coffee : public Drink {
-public:
-    virtual void Boil() {
-        cout << "煮水" << endl;
-    }
-    virtual void Brew() {
-        cout << "冲泡" << endl;
-    }
-    virtual void PourInCup() {
-        cout << "倒入杯中" << endl;
-    }
-    virtual void PutSomething() {
-        cout << "加入糖和牛奶" << endl;
-    }
-};
-
 int main () {
+    
     return 0;
 }
