@@ -4,6 +4,7 @@
 #include <random>
 #include <chrono>
 #include <pthread.h>
+#include <thread>
 
 // 随机数生成器
 std::vector<int> generateRandomData(size_t n) {
@@ -11,7 +12,8 @@ std::vector<int> generateRandomData(size_t n) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<int> dist(0, 1000000);
-    for (auto& x : data) x = dist(gen);
+    for (auto& x : data) 
+        x = dist(gen); 
     return data;
 }
 
@@ -31,8 +33,8 @@ std::vector<int> singleThreadSort(const std::vector<int>& data) {
 // 传递给线程的参数结构体
 struct ThreadParam {
     const std::vector<int>* data;   // 原始数据指针
-    size_t start;                   // 子数组起始索引
-    size_t end;                     // 子数组结束索引
+    size_t start;                   // 子数组起始
+    size_t end;                     // 子数组结束
     std::vector<int> result;        // 线程排序后的结果
 };
 
@@ -98,4 +100,25 @@ std::vector<int> parallelSortPthread(const std::vector<int>& data, size_t numThr
         result = std::move(merged);
     }
     return result;
+}
+
+int main() {
+    const size_t dataSize = 100000;
+    std::cout << "生成 " << dataSize << " 个随机整数...\n";
+    auto originalData = generateRandomData(dataSize);
+
+    // 使用系统支持的并发线程数
+    size_t numThreads = std::thread::hardware_concurrency();
+    if (numThreads == 0) numThreads = 4;
+    std::cout << "使用 " << numThreads << " 个线程进行多线程排序...\n";
+
+    auto parallelSorted = parallelSortPthread(originalData, numThreads);
+
+    if (isSorted(parallelSorted)) {
+        std::cout << "多线程排序结果正确！\n";
+    } else {
+        std::cout << "多线程排序结果错误！\n";
+    }
+
+    return 0;
 }
