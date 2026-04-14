@@ -45,3 +45,51 @@ using namespace std;
 //     test<int> t1;
 //     test<double> t2;
 // }
+
+#include <iostream>
+#include <stdexcept>
+
+template <typename T>
+class SimpleVector {
+private:
+    T* data;
+    size_t size;
+    size_t capacity;
+
+    void resize(size_t newCap) {
+        T* newData = new T[newCap];
+        for (size_t i = 0; i < size; ++i)
+            newData[i] = data[i];
+        delete[] data;
+        data = newData;
+        capacity = newCap;
+    }
+
+public:
+    SimpleVector() : data(nullptr), size(0), capacity(0) {}
+
+    ~SimpleVector() { delete[] data; }
+
+    void push_back(const T& val) {
+        if (size >= capacity) {
+            resize(capacity == 0 ? 1 : capacity * 2);
+        }
+        data[size++] = val;
+    }
+
+    T& operator[](size_t index) {
+        if (index >= size) throw std::out_of_range("Index out of range");
+        return data[index];
+    }
+
+    size_t getSize() const { return size; }
+};
+
+int main() {
+    SimpleVector<int> vec;
+    vec.push_back(10);
+    vec.push_back(20);
+    for (size_t i = 0; i < vec.getSize(); ++i)
+        std::cout << vec[i] << " ";
+    return 0;
+}
