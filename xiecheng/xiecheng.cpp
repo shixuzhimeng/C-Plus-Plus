@@ -2,6 +2,34 @@
 #include <coroutine>
 #include <exception>
 
+class Mywait {
+public:
+    bool await_ready() {
+        bool flag = true;
+        std::cout << "是否执行:" << std::boolalpha << flag << std::endl;
+        // true 表示协程不挂起，直接执行 await_resume()函数
+        // false 表示协程挂起，直接执行await_suspend()函数
+        return flag;
+    }
+
+    // 挂起时调用
+    bool await_suspend(std::coroutine_handle<> h) noexcept{
+        std::cout << "协程挂起" << std::endl;
+        // 如果返回true，表示协程挂起
+        // 如果返回false，表示协程不挂起
+
+        // handle  关联一个另外的协程
+        // 挂起当前的协程，转而去执行handle关联的协程
+        return false;
+    }
+
+    // 恢复时使用
+    int await_resume() noexcept{
+        std::cout << "协程执行" << std::endl;
+        return 100;
+    }
+};
+
 class CoroRALL {
 public:
     class promise_type {
@@ -22,18 +50,18 @@ public:
         }
 
         // return 和 value不能同时使用
-        // void return_void() {
-        //     std::cout << "协程函数逻辑结束" << std::endl;
-        // }
+        void return_void() {
+            std::cout << "协程函数逻辑结束" << std::endl;
+        }
         //
         // void return_value(int value) {
         //     _my_value = value;
         // }
 
-        std::suspend_always yield_value(int value) {
-            this->_my_value = value;
-            return {};
-        }
+        // std::suspend_always yield_value(int value) {
+        //     this->_my_value = value;
+        //     return {};
+        // }
 
         // 协程执行完之后，是否马上就销毁
         // std::suspend_always：挂起，不立即销毁，等待外部destroy释放资源
@@ -80,25 +108,33 @@ public:
 
 // 暂停：保存函数的状态（局部变量，参数信息，暂停的位置）
 // 恢复：恢复函数的状态
-CoroRALL my_coroutine() {
-    co_yield 10;
-    co_yield 20;
-    co_yield 30;
-    // std::cout << "协程执行" << std::endl;
-    // throw std::runtime_error("");
-    // std::cout << "协程执行" << std::endl;
-    // //co_return;
-    // co_return 100;
-    // std::cout << "协程执行" << std::endl;
+// CoroRALL my_coroutine() {
+//     co_yield 10;
+//     co_yield 20;
+//     co_yield 30;
+//     // std::cout << "协程执行" << std::endl;
+//     // throw std::runtime_error("");
+//     // std::cout << "协程执行" << std::endl;
+//     // //co_return;
+//     // co_return 100;
+//     // std::cout << "协程执行" << std::endl;
 
+// }
+
+CoroRALL coro_function() {
+    // co_await 后面跟的要么是可等待的对象，要么是通过await_transform转换为可可等待的对象
+
+    //int ret = co_await 100;
+     int ret = co_await Mywait();
+    std::cout << "协程结束:" << ret << std::endl;
+    co_return;
 }
-
 
 int main() {
     // 普通函数：一旦调用马上执行
     // 协程函数：一旦调用返回协程管理对象
     //std::coroutine_handle<> coro = my_coroutine();
-    CoroRALL coro = my_coroutine();
+    CoroRALL coro = coro_function();
     //coro.resume();
 
     //std::cout << coro.handle.promise()._my_value << std::endl;
@@ -107,14 +143,16 @@ int main() {
     // 协程管理的对象需要手动释放（创建协程的时候，编译器会在堆上给函数状态分配内存）
     //coro.destroy();
     
-    coro.handle.resume();
-    std::cout << "第一次的返回值" << coro.handle.promise()._my_value << std::endl;
+    // coro.handle.resume();
+    // std::cout << "第一次的返回值" << coro.handle.promise()._my_value << std::endl;
+    
+    // coro.handle.resume();
+    // std::cout << "第二次的返回值" << coro.handle.promise()._my_value << std::endl;
+    
+    // coro.handle.resume();
+    // std::cout << "第三次的返回值" << coro.handle.promise()._my_value << std::endl;
     
     coro.handle.resume();
-    std::cout << "第二次的返回值" << coro.handle.promise()._my_value << std::endl;
-    
-    coro.handle.resume();
-    std::cout << "第三次的返回值" << coro.handle.promise()._my_value << std::endl;
-    
+
     return 0;
 }
