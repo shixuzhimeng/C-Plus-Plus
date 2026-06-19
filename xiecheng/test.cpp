@@ -24,7 +24,7 @@ struct AsyncTask;
 template<>
 struct AsyncTask<void>;
 
-// 【核心修复】通用模板：只处理非 void 类型，仅保留 return_value
+// 通用模板：只处理非 void 类型，仅保留 return_value
 template<typename T>
 struct AsyncTask {
     struct promise_type {
@@ -78,7 +78,7 @@ struct AsyncTask {
     }
 };
 
-// 【核心修复】void 特化实现：仅保留 return_void
+// void 特化实现：仅保留 return_void
 template<>
 struct AsyncTask<void> {
     struct promise_type {
