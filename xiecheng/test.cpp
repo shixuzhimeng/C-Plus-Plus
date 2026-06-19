@@ -1,6 +1,30 @@
 #include <iostream>
-#include <coroutine>
 #include <string>
+#include <unordered_map>
+#include <coroutine>
+#include <chrono>
+#include <thread>
+#include <exception>
+#include <type_traits>
+
+// ================= 0. 兼容性辅助结构体 =================
+struct SuspendAlways {
+    bool await_ready() const noexcept { return false; }
+    void await_suspend(std::coroutine_handle<>) const noexcept {}
+    void await_resume() const noexcept {}
+};
+
+// ================= 1. 协程任务封装 (AsyncTask) =================
+
+// 前向声明
+template<typename T>
+struct AsyncTask;
+
+// void 特化声明
+template<>
+struct AsyncTask<void>;
+
+// 【核心修复】通用模板：只处理非 void 类型，仅保留 return_value
 template<typename T>
 struct AsyncTask {
     struct promise_type {
@@ -10,124 +34,154 @@ struct AsyncTask {
         AsyncTask get_return_object() {
             return AsyncTask{std::coroutine_handle<promise_type>::from_promise(*this)};
         }
-        std::suspend_always initial_suspend() { 
-            return {}; 
-        }
-        std::suspend_always final_suspend() noexcept { 
-            return {};
-        }
-        void unhandled_exception() {
-            exception = std::current_exception();
-        }
+        SuspendAlways initial_suspend() { return {}; }
+        SuspendAlways final_suspend() noexcept { return {}; }
+        void unhandled_exception() { exception = std::current_exception(); }
         
-        template<typename U> void return_value(U&& val) {
-            value = std::forward<U>(val);
+        // 仅保留 return_value
+        void return_value(T val) { 
+            value = std::move(val); 
         }
+    };
+
+    std::coroutine_handle<promise_type> handle;
+    
+    ~AsyncTask() { if (handle) handle.destroy(); }
+    AsyncTask(const AsyncTask&) = delete;
+    AsyncTask& operator=(const AsyncTask&) = delete;
+    AsyncTask(AsyncTask&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+
+    T get() {
+        if (!handle) throw std::runtime_error("AsyncTask handle is null");
+        if (handle.promise().exception) std::rethrow_exception(handle.promise().exception);
+        return handle.promise().value;
+    }
+    
+    auto operator co_await() {
+        struct Awaiter {
+            std::coroutine_handle<promise_type> h;
+            bool await_ready() { return !h || h.done(); } 
+            void await_suspend(std::coroutine_handle<> awaiting_coroutine) {
+                if (!h) return;
+                std::jthread([h = h]() {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
+                    h.resume(); 
+                });
+            }
+            T await_resume() { 
+                if (!h) return T{};
+                if (h.promise().exception) std::rethrow_exception(h.promise().exception);
+                return h.promise().value; 
+            }
+        };
+        return Awaiter{handle};
+    }
+};
+
+// 【核心修复】void 特化实现：仅保留 return_void
+template<>
+struct AsyncTask<void> {
+    struct promise_type {
+        std::exception_ptr exception;
+        AsyncTask<void> get_return_object() {
+            return AsyncTask<void>(); 
+        }
+        SuspendAlways initial_suspend() { return {}; }
+        SuspendAlways final_suspend() noexcept { return {}; }
+        void unhandled_exception() { exception = std::current_exception(); }
+        
+        // 仅保留 return_void
         void return_void() {}
     };
 
     std::coroutine_handle<promise_type> handle;
     
-    // RAII 管理协程句柄，防止内存泄漏
-    ~AsyncTask() {
-        if (handle)
-            handle.destroy();
-    }
-    // 禁止拷贝，允许移动
+    AsyncTask() = default; 
+    ~AsyncTask() { if (handle) handle.destroy(); }
     AsyncTask(const AsyncTask&) = delete;
     AsyncTask& operator=(const AsyncTask&) = delete;
-    AsyncTask(AsyncTask&& other) noexcept : handle(other.handle) { 
-        other.handle = nullptr;
+    AsyncTask(AsyncTask&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+    
+    void get() {
+        if (!handle) return;
+        if (handle.promise().exception) std::rethrow_exception(handle.promise().exception);
     }
 
-    // 获取协程返回值
-    T get() {
-        if (handle.promise().exception) 
-            std::rethrow_exception(handle.promise().exception);
-        return handle.promise().value;
-    }
-    
-    // 支持 co_await
     auto operator co_await() {
         struct Awaiter {
             std::coroutine_handle<promise_type> h;
-            bool await_ready() { 
-                return false;
-            } // 总是挂起，交由外部调度器恢复
+            bool await_ready() { return !h || h.done(); } 
             void await_suspend(std::coroutine_handle<> awaiting_coroutine) {
-                // 在实际网络框架中，这里会将 awaiting_coroutine 注册到 IO 完成端口
-                // 当网络数据到达时，IO 线程会调用 h.resume()
-                std::thread([h = h, awaiting_coroutine]() {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                if (!h) return;
+                std::jthread([h = h]() {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100)); 
                     h.resume(); 
-                }).detach();
+                });
             }
-            T await_resume() { return h.promise().value; }
+            void await_resume() { 
+                if (h && h.promise().exception) std::rethrow_exception(h.promise().exception);
+            }
         };
         return Awaiter{handle};
     }
 };
-// 模拟网络请求/响应的数据结构
+
+// ================= 2. 聊天室业务逻辑与服务器 =================
+
 struct NetworkPacket {
-    std::string type; // "REGISTER", "LOGIN", "LOGOUT", "CHAT"
+    std::string type;
     std::string username;
     std::string password;
     std::string token;
     std::string message;
-    bool success;
+    bool success = false;
 };
 
-// 模拟底层异步网络 IO
 AsyncTask<NetworkPacket> mock_network_io(const NetworkPacket& request) {
     std::cout << "[网络层] 发送请求: " << request.type << " (用户: " << request.username << ")" << std::endl;
-    // co_await 会触发 AsyncTask::Awaiter::await_suspend，模拟异步挂起
-    NetworkPacket response = co_await AsyncTask<NetworkPacket>{nullptr}; 
-    // 在实际 asio 中，这里会是 co_await socket.async_read_some(...)
-    // 这里的 response 将由外部模拟填充
+    co_await SuspendAlways{}; 
+
+    NetworkPacket response;
+    response.type = request.type;
+    response.username = request.username;
+    response.success = true; 
+    response.message = "Mock Success";
+    
     co_return response;
 }
 
 class ChatServer {
 public:
-    // 用户会话结构
     struct Session {
         std::string token;
         bool is_logged_in = false;
     };
 
-    // 处理注册
     AsyncTask<NetworkPacket> handleRegister(const std::string& username, const std::string& password) {
         NetworkPacket req{"REGISTER", username, password};
-        
-        // 1. 协程挂起，等待网络返回注册结果
         NetworkPacket res = co_await mock_network_io(req);
         
-        // 模拟服务器校验逻辑
         if (username.empty() || password.empty()) {
             res.success = false; res.message = "用户名或密码不能为空";
         } else if (users_.find(username) != users_.end()) {
             res.success = false; res.message = "用户已存在";
         } else {
-            users_[username] = Session{}; // 预创建用户
+            users_[username] = Session{};
             res.success = true; res.message = "注册成功，请登录";
         }
         co_return res;
     }
 
-    // 处理登录
-    AsyncTask<NetworkPacket> handleLogin(const std::string& username, const::string& password) {
+    AsyncTask<NetworkPacket> handleLogin(const std::string& username, const std::string& password) {
         NetworkPacket req{"LOGIN", username, password};
-        
-        // 2. 协程挂起，等待网络返回登录结果
         NetworkPacket res = co_await mock_network_io(req);
 
         auto it = users_.find(username);
         if (it == users_.end()) {
             res.success = false; res.message = "用户不存在，请先注册";
-        } else if (password != "123456") { // 模拟简单密码校验
+        } else if (password != "123456") {
             res.success = false; res.message = "密码错误";
         } else {
-            // 生成 Token 并标记在线
             it->second.token = "TOKEN_" + username + "_" + std::to_string(rand());
             it->second.is_logged_in = true;
             res.success = true; 
@@ -138,11 +192,8 @@ public:
         co_return res;
     }
 
-    // 处理注销
     AsyncTask<NetworkPacket> handleLogout(const std::string& username, const std::string& token) {
         NetworkPacket req{"LOGOUT", username};
-        
-        // 3. 协程挂起，等待网络返回注销结果
         NetworkPacket res = co_await mock_network_io(req);
 
         auto it = users_.find(username);
@@ -160,3 +211,50 @@ public:
 private:
     std::unordered_map<std::string, Session> users_;
 };
+
+// ================= 3. 客户端协程业务流 =================
+
+AsyncTask<void> clientWorkflow(ChatServer& server, const std::string& username, const std::string& password) {
+    std::cout << "====== 客户端 (" << username << ") 开始操作 ======" << std::endl;
+
+    auto regRes = co_await server.handleRegister(username, password);
+    std::cout << "[客户端] 注册结果: " << regRes.message << std::endl;
+
+    auto loginRes = co_await server.handleLogin(username, password);
+    if (!loginRes.success) {
+        std::cout << "[客户端] 登录失败，终止流程: " << loginRes.message << std::endl;
+        co_return;
+    }
+    std::cout << "[客户端] 登录成功，获取 Token: " << loginRes.token << std::endl;
+
+    std::cout << "[客户端] 正在聊天室中潜水..." << std::endl;
+    co_await SuspendAlways{}; 
+
+    auto logoutRes = co_await server.handleLogout(username, loginRes.token);
+    std::cout << "[客户端] 注销结果: " << logoutRes.message << std::endl;
+    
+    std::cout << "====== 客户端 (" << username << ") 流程结束 ======\n" << std::endl;
+}
+
+// ================= 4. 主函数驱动 =================
+int main() {
+    try {
+        ChatServer server;
+
+        auto task1 = clientWorkflow(server, "Alice", "123456");
+        auto task2 = clientWorkflow(server, "Bob", "123456");
+        auto task3 = clientWorkflow(server, "Alice", "654321"); 
+
+        task1.handle.resume();
+        task2.handle.resume();
+        task3.handle.resume();
+        
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        
+    } catch (const std::exception& e) {
+        std::cerr << "程序发生异常: " << e.what() << std::endl;
+        return 1;
+    }
+    
+    return 0;
+}
