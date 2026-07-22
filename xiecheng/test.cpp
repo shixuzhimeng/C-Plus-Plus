@@ -24,7 +24,11 @@ struct AsyncTask;
 template<>
 struct AsyncTask<void>;
 
+<<<<<<< Updated upstream
 // 通用模板：只处理非 void 类型，仅保留 return_value
+=======
+//通用模板：只处理非 void 类型，仅保留 return_value
+>>>>>>> Stashed changes
 template<typename T>
 struct AsyncTask {
     struct promise_type {
@@ -78,7 +82,11 @@ struct AsyncTask {
     }
 };
 
+<<<<<<< Updated upstream
 // void 特化实现：仅保留 return_void
+=======
+//void 特化实现：仅保留 return_void
+>>>>>>> Stashed changes
 template<>
 struct AsyncTask<void> {
     struct promise_type {
