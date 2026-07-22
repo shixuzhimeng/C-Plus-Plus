@@ -190,3 +190,11 @@ using namespace std;
 //     return 0;
 // }
 
+int main () {
+    string s1 = "hello world";
+    string s2 = s1.substr(1, 3);
+    for(char i : s2) {
+        cout << i;
+    }
+    return 0;
+}
